@@ -2,7 +2,7 @@
 Functions and utilities to operate a recast instance
 */
 
-fn split(data: &[u8], chunk_size: usize) -> Vec<&[u8]>  {
+pub fn split(data: &[u8], chunk_size: usize) -> Vec<&[u8]>  {
     let mut chunks = Vec::new();
     for chunk in data.chunks(chunk_size) {
         chunks.push(chunk);
@@ -10,7 +10,7 @@ fn split(data: &[u8], chunk_size: usize) -> Vec<&[u8]>  {
     return chunks;
 }
 
-fn merge(chunks: Vec<&[u8]>) -> Vec<u8> {
+pub fn merge(chunks: Vec<&[u8]>) -> Vec<u8> {
     return chunks.as_slice().concat();
 }
 
