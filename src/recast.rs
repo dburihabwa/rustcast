@@ -2,6 +2,15 @@
 Functions and utilities to operate a recast instance
 */
 
+pub struct Block {
+    data: Vec<u8>,
+    index: usize
+}
+
+pub struct Encoded {
+    blocks: Vec<Block>
+}
+
 pub fn split(data: &[u8], chunk_size: usize) -> Vec<&[u8]>  {
     let mut chunks = Vec::new();
     for chunk in data.chunks(chunk_size) {
@@ -12,6 +21,25 @@ pub fn split(data: &[u8], chunk_size: usize) -> Vec<&[u8]>  {
 
 pub fn merge(chunks: Vec<&[u8]>) -> Vec<u8> {
     return chunks.as_slice().concat();
+}
+
+//pub fn encode(data: &[u8], k:usize, m: usize) -> &Vec<&[u8]> {
+pub fn encode(data: &[u8], k:usize, m: usize) -> Encoded {
+    let n = k + m;
+    let mut encoded = Vec::with_capacity(n);
+    let chunk_length = data.len() / k;
+    for i in 0..k {
+        let block_start = i * chunk_length;
+        let block_end = block_start + chunk_length;
+        let block_data = data[block_start..block_end].to_vec();
+        let block = Block { data: block_data , index: i };
+        encoded.push(block);
+    }
+    for i in k..n {
+        let block = Block { data: data[0..chunk_length].to_vec(), index: i };
+        encoded.push(block);
+    }
+    Encoded {blocks: encoded}
 }
 
 
@@ -66,5 +94,19 @@ mod tests {
         chunks.push(&[0]);
         let merged = merge(chunks);
         assert_eq!(merged.len(), 2);
+    }
+
+    #[test]
+    fn test_encode() {
+        let data: [u8; 10] = [0; 10];
+        let k = 10;
+        let m = 5;
+        let encoded = encode(&data, k, m);
+        assert_eq!(encoded.blocks.len(), 15);
+        for (index, block) in encoded.blocks.iter().enumerate() {
+            println!("{}", index);
+            assert_eq!(block.index, index);
+            assert_eq!(block.data.len(), 1);
+        }
     }
 }
